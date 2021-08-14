@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Privee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Inertia\Inertia;
 
 class PriveeController extends Controller
 {
@@ -12,10 +13,28 @@ class PriveeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        return Privee::orderBy('created_at', 'DESC')->get();
+        return Inertia::render('Kaji/privee',
+        ['items'=>Privee::when($request->term, function($query, $term){
+            $query->where('country', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('province', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('city', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('domaine', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('salary', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('position', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('dateFinal', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('cvemail', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+        }
+        )->orderBy('created_at', 'DESC')->get()]);
+
+        /*
+        return Privee::when($request->search, function($query, $term){
+            $query->where('domaine', 'LIKE', '%'.$term.'%');
+        }
+        )->orderBy('created_at', 'DESC')->get();*/
+        
     }
 
     /**
@@ -39,7 +58,8 @@ class PriveeController extends Controller
         //
 
         $newJob = request()->validate([
-            'prive.country' => ['required', 'string', 'max:255'],
+            'prive.country' => ['required','min:3','string', 'max:255'],
+            'prive.province' => ['required', 'string', 'max:255'],
             'prive.city' => ['required', 'string', 'max:255'],
             'prive.domaine' => ['required', 'string', 'max:255'],
             'prive.position' => ['required', 'string', 'max:255'],
@@ -65,7 +85,9 @@ class PriveeController extends Controller
 
 */            
         $newPrive = new Privee;
+        $newPrive->user_id = $request->prive["user_id"];
         $newPrive->country = $request->prive["country"];
+        $newPrive->province = $request->prive["province"];
         $newPrive->city = $request->prive["city"];
         $newPrive->domaine = $request->prive["domaine"];
         $newPrive->position = $request->prive["position"];
@@ -90,6 +112,7 @@ class PriveeController extends Controller
     public function show($id)
     {
         //
+        return Inertia::render('Kaji/modifiePrivee', ['prive'=>Privee::findOrfail($id)]);
     }
 
     /**
@@ -110,9 +133,84 @@ class PriveeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Privee $prive, $id)
     {
         //
+        $updatePost = Privee::find($id);
+
+        if($updatePost){
+            
+            $updatePost->country = $request->prive["country"];
+            $updatePost->province = $request->prive["province"];
+            $updatePost->city = $request->prive["city"];
+            $updatePost->domaine = $request->prive["domaine"];
+            $updatePost->position = $request->prive["position"];
+            $updatePost->currency = $request->prive["currency"];
+            $updatePost->salary = $request->prive["salary"];
+            $updatePost->description = $request->prive["description"];
+            $updatePost->dateFinal = $request->prive["dateFinal"];
+            $updatePost->cvemail = $request->prive["cvemail"];
+            
+            $updatePost->update();
+    
+            return $updatePost;
+        }
+
+        return "Post not found";
+
+    }
+
+    public function search(Request $request ){
+  
+        return Inertia::render('Kaji/privee',
+        ['searchItems'=>Privee::when($request->term, function($query, $term){
+            $query->where('country', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('province', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('city', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('salary', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('position', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('dateFinal', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+        }
+        )->orderBy('created_at', 'DESC')->get()]);
+        
+      /*
+        return Inertia::render('Kaji/test',
+        ['searchItems'=>Privee::when($request->term, function($query, $term){
+            $query->where('domaine', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+        }
+        )->orderBy('created_at', 'DESC')->get()]);
+
+        return Inertia::render('Kaji/search',
+        ['Item' => Privee::orderBy('created_at', 'DESC')->get()]);
+        $queries = ['search'];
+        return Inertia::render('Kaji/search', [
+            'posts' => Privee::filter($request->only($queries)),
+            'filters'=> $request->all($queries),
+        ]);
+        */
+    }
+
+    public function searchAll(Request $request ){
+        $queries = ['search'];
+        return Inertia::render('Kaji/search',
+        ['searchAll'=> Privee::filter($request->only($queries))->get(),
+        'filters'=> $request->all($queries)->orderBy('created_at', 'DESC')->get()]);
+        
+      /*
+        return Inertia::render('Kaji/test',
+        ['searchItems'=>Privee::when($request->term, function($query, $term){
+            $query->where('domaine', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+        }
+        )->orderBy('created_at', 'DESC')->get()]);
+
+        return Inertia::render('Kaji/search',
+        ['Item' => Privee::orderBy('created_at', 'DESC')->get()]);
+        $queries = ['search'];
+        return Inertia::render('Kaji/search', [
+            'posts' => Privee::filter($request->only($queries)),
+            'filters'=> $request->all($queries),
+        ]);
+        */
     }
 
     /**

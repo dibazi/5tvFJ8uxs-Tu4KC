@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 use App\Models\Companie;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class CompanieController extends Controller
 {
@@ -12,10 +15,27 @@ class CompanieController extends Controller
      *
      * @return \Illuminate\Http\Response    
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+
+        return Inertia::render('Kaji/companies',
+        ['companies'=>Companie::when($request->term, function($query, $term){
+            $query->where('companyName', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('country', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('province', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('city', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('domaine', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('salary', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('position', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('dateFinal', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('cvemail', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+        }
+        )->orderBy('created_at', 'DESC')->get()]);
+
+        /*
         return Companie::orderBy('created_at', 'DESC')->get();
+        */
     }
 
     /**
@@ -34,13 +54,17 @@ class CompanieController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store( Request $request)
     {
         
         //
+
+
+
         $newJob = request()->validate([
             'job.companyName' =>  ['required', 'string', 'max:255'],
             'job.country' => ['required', 'string', 'max:255'],
+            'job.province' => ['required', 'string', 'max:255'],
             'job.city' => ['required', 'string', 'max:255'],
             'job.adress' => ['required', 'string', 'max:255'],
             'job.companyTel' => ['required', 'string', 'max:255'],
@@ -52,6 +76,7 @@ class CompanieController extends Controller
             'job.dateFinal' => ['required', 'string', 'max:255'],
             'job.cvemail' => ['required', 'string', 'max:255'],
             ]);
+
 /*
              Companie::create([
                 'companyName' => $newJob['companyName'],
@@ -70,8 +95,10 @@ class CompanieController extends Controller
             ]);
 */
         $newJob = new Companie;
+        $newJob->user_id = $request->job["user_id"];
         $newJob->companyName = $request->job["companyName"];
         $newJob->country = $request->job["country"];
+        $newJob->province = $request->job["province"];
         $newJob->city = $request->job["city"];
         $newJob->adress = $request->job["adress"];
         $newJob->companyTel = $request->job["companyTel"];
@@ -86,7 +113,7 @@ class CompanieController extends Controller
         $newJob->save();
 
         return $newJob;
-        
+    
     }
 
     /**
@@ -98,6 +125,8 @@ class CompanieController extends Controller
     public function show($id)
     {
         //
+        return Inertia::render('Kaji/modifierCompanie', ['job'=>Companie::findOrfail($id)]);
+
     }
 
     /**
@@ -118,9 +147,44 @@ class CompanieController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Companie $job, $id)
     {
         //
+        $updatePost = Companie::find($id);
+
+        if($updatePost){
+            
+            $updatePost->companyName = $request->job["companyName"];
+            $updatePost->country = $request->job["country"];
+            $updatePost->province = $request->job["province"];
+            $updatePost->city = $request->job["city"];
+            $updatePost->adress = $request->job["adress"];
+            $updatePost->companyTel = $request->job["companyTel"];
+            $updatePost->domaine = $request->job["domaine"];
+            $updatePost->position = $request->job["position"];
+            $updatePost->currency = $request->job["currency"];
+            $updatePost->salary = $request->job["salary"];
+            $updatePost->description = $request->job["description"];
+            $updatePost->dateFinal = $request->job["dateFinal"];
+            $updatePost->cvemail = $request->job["cvemail"];
+            
+            $updatePost->update();
+        }
+
+        return "Post not found";
+
+    }
+    public function search(Request $request ){
+        return Inertia::render('Kaji/companies',
+        ['searchItems'=>Privee::when($request->term, function($query, $term){
+            $query->where('country', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('province', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('city', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('salary', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('position', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+            $query->where('dateFinal', 'LIKE', '%'.$term.'%', 'OR', 'country', 'LIKE', '%'.$term.'%');
+        }
+        )->orderBy('created_at', 'DESC')->get()]);
     }
 
     /**

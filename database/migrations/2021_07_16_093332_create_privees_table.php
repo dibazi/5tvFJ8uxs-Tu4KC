@@ -15,7 +15,9 @@ class CreatePriveesTable extends Migration
     {
         Schema::create('privees', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->string('country');
+            $table->string('province');
             $table->string('city');
             $table->string('domaine');
             $table->string('position');
@@ -25,6 +27,8 @@ class CreatePriveesTable extends Migration
             $table->string('dateFinal');
             $table->string('cvemail');
             $table->timestamps();
+
+            $table->index('user_id');
         });
     }
 

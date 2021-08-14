@@ -1,12 +1,5 @@
 <template>
 
-    <app-layout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Formulaire pour particulier 
-            </h2>
-        </template>
-
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
@@ -61,9 +54,8 @@
 
                                         <div><label for="" class="text-blue-700">Cree anonce comme companie, click <inertia-link class="text-green-500" href="/c/f">ici</inertia-link>.</label></div>
 
-                                        <form @submit.prevent="addItem()" action="" class="flex flex-col space-y-4">
-
-                                            <div><label for="" class="text-blue-700">Information sur anonce</label></div>
+                                        <form @submit.prevent="updateCheck()" action="" class="flex flex-col space-y-4">
+                                            <div><label for="" class="text-blue-700">Information sur le Particulier</label></div>
 
                                             
                                             <div class="contact-form-success alert alert-success mt-4" v-if="success">
@@ -151,7 +143,7 @@
                                             <div>
                                                 <label for="" class="text-sm">Date final</label>
                                                 
-                                                <datepicker :language="fr" format="MM-dd-YYYY" name="prive.dateFinal" id="prive.dateFinal" v-model="prive.dateFinal" required type="date" placeholder="Date final depot de candidature Exp. 21/02/2021" class="ring ring-gray-300 w-full rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-teal-300" />
+                                                <datepicker :language="fr" format="MM-dd-YYYY" name="prive.dateFinal" id="prive.dateFinal" v-model="prive.dateFinal" required type="text" placeholder="Date final depot de candidature Exp. 21/02/2021" class="ring ring-gray-300 w-full rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-teal-300" />
                                                 <div v-if="hasErrors('prive.dateFinal')">
                                                     <p class="text-red-700">Entrer Date final.</p> 
                                                 </div>
@@ -189,7 +181,7 @@
                 </div>
             </div>
         </div>
-    </app-layout>
+
 </template>
 
 <script setup>
@@ -207,43 +199,56 @@ const dateFinal = ref(new Date())
 
 
     export default {
+        props: ['prive'],
+        
         components: {
             AppLayout,
             DatePicker,
             moment
 
         },
-                data: function() {
+        
+        data: function() {
             return{
                 success: false,
                 error: false,
                 errors: {},
+                loading: false,
 
                 prive:{
-                   user_id: this.$page.props.user.id,
-                   country:null,
-                   province:null,
-                   city:null,
-                   domaine:null,
-                   position:null,
-                   currency:null,
-                   salary:null,
-                   description:null,
-                   dateFinal:moment().format('YYYY-MM-DD'),
-                   cvemail:null
+ 
+                   country:this.prive.country,
+                   province:this.prive.province,
+                   city:this.prive.city,
+                   domaine:this.prive.domaine,
+                   position:this.prive.position,
+                   currency:this.prive.currency,
+                   salary:this.prive.salary,
+                   description:this.prive.description,
+                   dateFinal:this.prive.dateFinal,
+                   cvemail:this.prive.cvemail
                        
                 }
             }
         },
+
             methods:{
-            addItem(){
+
+            no(){
+                this.loading = true;
+                this.$inertia.patch(`/edit/${this.prive.id}`, this.prive).then(() => {
+                this.loading = false;
+                });
+            },
+
+            updateCheck(){
                 if(this.prive.email == ''){
                     return;
                 }
-                axios.post('/api/p', {
+            axios.patch(`/edit/${this.prive.id}/p`, {
                     prive: this.prive
                 }).then(response =>{
-                    if(response.status == 201){
+                    if(response.status == 200){
                         this.prive.country = "";
                         this.prive.city = "";
                         this.prive.province = "";
@@ -253,7 +258,7 @@ const dateFinal = ref(new Date())
                         this.prive.salary = "";
                         this.prive.description = "";
                         this.prive.dateFinal = "";
-                        this.prive.cvemail = "";
+                        this.prive.cvemail;
                         this.onSuccess(response.data.message);
                         this.redirectRoute();
                         this.$emit('itemchanged');

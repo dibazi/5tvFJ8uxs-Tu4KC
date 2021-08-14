@@ -1,12 +1,5 @@
 <template>
 
-    <app-layout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Formulaire pour companie
-            </h2>
-        </template>
-
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
@@ -59,9 +52,11 @@
                                 <div>
                                     <div class="bg-white rounded-xl shawdow-lg p-8 text-gray-600">
 
-                                        <div><label for="" class="text-blue-700">Cree anonce comme particulier, click <a class="text-green-500" href="/p/f">ici</a>.</label></div>
+                                        <div><label for="" class="text-blue-700">Page d'acceuil click <inertia-link class="text-green-500" href="/c/o">ici</inertia-link>.</label></div>
 
-                                        <form @submit.prevent="addItem()" action="" class="flex flex-col space-y-4 contact-form">
+                                        <form @submit.prevent="updateCheck()" action="" class="flex flex-col space-y-4 contact-form">
+
+                                            <div><label for="" class="text-blue-700"> Modifier annonce</label></div>
 
                                             <div class="contact-form-success alert alert-success mt-4" v-if="success">
 
@@ -69,14 +64,9 @@
                                                 <span class="mail-error-message text-1 d-block"></span>
                                             </div>
 
-                                            <div class="contact-form-error alert alert-danger mt-4" v-if="error">
-                                                <strong>Errors</strong>
-                                                <span class="mail-error-message text-1 d-block"></span>
-                                            </div>
-
-                                            <div><label for="" class="text-blue-700">Information sur la companie.</label></div>
+                                            <div><label for="" class="text-blue-700">Information sur la companie</label></div>
                                             <div>
-                                                <label for="job.companyName" class="text-sm">Nom companie </label>
+                                                <label for="companyName" class="text-sm">Nom </label>
 
                                                 <input name="job.companyName" id="job.companyName" v-model="job.companyName" required type="text"  placeholder="Nom de la companie. Exp Kaji Limited"  class="ring ring-gray-300 w-full rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-teal-300 form-control is-invalid" >
                                                 <div v-if="hasErrors('job.companyName')">
@@ -139,7 +129,7 @@
                                             </div>
                                           
                                              <div>
-                                                <label for="job.position" class="text-sm">Nom du post</label>
+                                                <label for="" class="text-sm">Nom du post</label>
 
                                                 <input name="job.position" id="job.position" v-model="job.position" required  type="text" placeholder="Ex. Chef de chantier" class="ring ring-gray-300 w-full rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-teal-300">
                                                 <div v-if="hasErrors('job.position')">
@@ -148,7 +138,7 @@
                                             </div>
 
                                             <div class="mt-4">
-                                                <label for="job.currency" class="text-sm">choisir devise</label>
+                                                <label for="" class="text-sm">choisir devise</label>
                                                 <select name="job.currency" id="job.currency" v-model="job.currency" required class="ring ring-gray-300 outline-none focus:ring-teal-300 block mt-1 w-full px-4 py-2 border-gray-300 rounded-md shadow-sm">
                                                     <option value="FC">Franc congolais</option>
                                                     <option value="$">Dollor americain</option>
@@ -182,7 +172,7 @@
                                             </div>
 
                                             <div>
-                                                <label for="job.cvemail" class="text-sm">Adress mail pour cv</label>
+                                                <label for="cvemail" class="text-sm">Adress mail pour cv</label>
 
                                                 <input name="job.cvemail" id="job.cvemail" v-model="job.cvemail" required  type="email" placeholder="Adress mail ou envoyer les cv Exp. adressecv@kaji.com" class="ring ring-gray-300 w-full rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-teal-300">
                                                 <div v-if="hasErrors('job.cvemail')">
@@ -190,7 +180,7 @@
                                                 </div>
                                             </div>
 
-                                            <button class="inline-block self-end bg-blue-700 text-white font rounded-lg px-6 py-2 uppercase ">Publie</button>
+                                            <button class="inline-block self-end bg-blue-700 text-white font rounded-lg px-6 py-2 uppercase ">Modifier</button>
                                             <div v-if="success">
                                                  <p class="text-green-700">Bravo!!! votre anonce a ete creee voir click  <strong><a  class="text-bleu-500" href="/c/o">ici.</a></strong>. </p>
                                             </div>
@@ -212,7 +202,7 @@
                 </div>
             </div>
         </div>
-    </app-layout>
+
 </template>
 
 <script setup>
@@ -220,50 +210,69 @@ import Datepicker from 'vue3-datepicker'
 import { ref } from 'vue'
 const dateFinal = ref(new Date())
 </script>
-
 <script>
+
     import AppLayout from '@/Layouts/AppLayout'
     import axios from 'axios'
+    import DatePicker from 'vue3-datepicker'
+    import moment from 'moment'
+
+
 
     export default {
+        props: ['job'],
+        
         components: {
             AppLayout,
-            Datepicker
+            DatePicker,
+            moment
 
         },
-                data: function() {
+        
+        data: function() {
             return{
                 success: false,
                 error: false,
                 errors: {},
+                loading: false,
 
                 job:{
-                   user_id: this.$page.props.user.id,
-                   companyName:null,
-                   country:null,
-                   province:null,
-                   city:null,
-                   adress:null,
-                   companyTel:null,
-                   domaine:null,
-                   position:null,
-                   salary:null,
-                   currency:null,
-                   dateFinal:null,
-                   description:null
+ 
+
+                   companyName:this.job.companyName,
+                   country:this.job.country,
+                   province:this.job.province,
+                   city:this.job.city,
+                   adress:this.job.adress,
+                   companyTel:this.job.companyTel,
+                   domaine:this.job.domaine,
+                   position:this.job.position,
+                   salary:this.job.salary,
+                   currency:this.job.currency,
+                   dateFinal:this.job.dateFinal,
+                   description:this.job.description
                        
                 }
             }
         },
+
             methods:{
-            addItem(){
+
+            no(){
+                this.loading = true;
+                this.$inertia.patch(`/edit/${this.job.id}`, this.job).then(() => {
+                this.loading = false;
+                });
+            },
+
+            updateCheck(){
                 if(this.job.companyName == ''){
                     return;
                 }
-                axios.post('/api/c', {
+                axios.patch(`/edit/${this.job.id}/c`, {
                     job: this.job
                 }).then(response =>{
-                    if(response.status == 201){
+                    if(response.status == 200){
                         this.job.companyName = "";
                         this.job.country = "";
                         this.job.province="";
@@ -277,12 +286,11 @@ const dateFinal = ref(new Date())
                         this.job.description = "";
                         this.job.dateFinal = "";
                         this.job.cvemail = "";
-                        this.redirect();
-                        this.$emit('itemchanged');
                         this.onSuccess(response.data.message);
+                        this.redirectRoute();
+                        this.$emit('itemchanged');
+      
                         
-                             
-
                     }
                 }).catch( error =>{
 
@@ -309,11 +317,10 @@ const dateFinal = ref(new Date())
             hasErrors(fieldName){
                 return (fieldName in this.errors);
             },
-            redirect(){
+            redirectRoute(){
                 this.$inertia.visit('/c/o');
             }
         }
     }
 </script>
-
 

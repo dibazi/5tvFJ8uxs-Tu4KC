@@ -2,32 +2,38 @@
 
 
        <!-- <h2 class="text-lg font-semibold leading-6" >{{ item.companyName }}</h2> -->
-        <p class="text-gray-600" > <strong>Anonce creer: </strong>{{ item.created_at }}</p>
+        <p class="text-gray-600" > <strong>Anonce creer: </strong>{{ moment(item.created_at).format("DD/MM/YYYY") }}</p>
+        <h2>Detail sur la companie</h2>
         <p class="text-gray-600" > <strong>Companie nom: </strong>{{ item.companyName }}</p>
         <p class="text-gray-600" ><strong>Companie pays: </strong>{{ item.country }}</p>
+        <p class="text-gray-600" ><strong>Companie province: </strong>{{ item.province }}</p>
         <p class="text-gray-600" ><strong>Companie ville: </strong>{{ item.city }}</p>
         <p class="text-gray-600" ><strong>Companie adress: </strong> {{ item.adress }}</p>
         <p class="text-gray-600" ><strong>Companie tel: </strong>  {{ item.companyTel }}</p>
         <p class="text-gray-600" ><strong>Companie domaine: </strong> {{ item.domaine }}</p>
+        <h2>Detail sur le post</h2>
         <p class="text-gray-600" ><strong>Position du post: </strong> {{ item.position }}</p>
         <p class="text-gray-600" ><strong>Salaire: {{item.currency}}</strong> {{ item.salary }}</p>
         <p class="text-gray-600" ><strong>Description:</strong> <br> {{ item.description }}</p>
+        <p class="text-gray-600" ><strong>Date final pour depot de candidature:</strong> <br> {{ item.dateFinal }}</p>
         <p class="text-gray-600" ><strong>Email pour depot de candidature: </strong> {{ item.cvemail }}</p>
+        <InertiaLink v-if="item.user_id == $page.props.user.id" class="text-green-500" :href="route('edit.companies', { id: item.id })">
+            Modifier
+        </InertiaLink>
         
-
-        
-
         <!-- 
         <input type="checkbox"
         @change="updateCheck()"
         v-model="item.completed"/>
         <span :class="[item.completed ?'completed' : '', 'itemText']">{{ item.name }}</span>
-        <input value="delete" type="submit" @click="removeItem()" class="trashcan"/> -->
+        <input value="delete" type="submit" @click="removeItem()" class="trashcan"/> 
+        -->
 
 </template>
 
 <script>
 import axios from 'axios'
+import moment from 'moment'
     export default {
         props: ['item', 'data'],
 
@@ -37,7 +43,8 @@ import axios from 'axios'
                 isOpen: false,
                 showText: false,
                 Detail: false,
-                name:'Show'
+                name:'Show',
+                moment: moment
             }
         },
 

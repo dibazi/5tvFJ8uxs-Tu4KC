@@ -38,7 +38,7 @@ export default {
 
             }
         },
-                methods: {
+        methods: {
 
             openModal() {
                 this.isOpen = true;
@@ -47,7 +47,7 @@ export default {
                 this.isOpen = false;
 
             }
-                }
+        }
 
      
     }

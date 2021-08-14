@@ -15,8 +15,10 @@ class CreateCompaniesTable extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
             $table->string('companyName');
             $table->string('country');
+            $table->string('province');
             $table->string('city');
             $table->string('adress');
             $table->string('companyTel');
@@ -28,6 +30,9 @@ class CreateCompaniesTable extends Migration
             $table->string('dateFinal');
             $table->string('cvemail');
             $table->timestamps();
+
+            $table->index('user_id');
+            
         });
     }
 
